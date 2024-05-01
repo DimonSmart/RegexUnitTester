@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
+using DimonSmart.RegexUnitTester.Attributes;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
+namespace DimonSmart.RegexUnitTester.TestAdapter;
 
 [ExtensionUri("executor://RegexUnitTestExecutor")]
 [DefaultExecutorUri("executor://RegexUnitTestExecutor")]
@@ -13,10 +14,10 @@ public class RegexUnitTestDiscoverer : ITestDiscoverer
 {
     public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
     {
-        foreach (string source in sources)
+        foreach (var source in sources)
         {
             var assembly = Assembly.LoadFrom(source);
-            foreach (Type type in assembly.GetTypes())
+            foreach (var type in assembly.GetTypes())
             {
                 DiscoverTestsInType(type, logger, discoverySink);
             }
@@ -25,12 +26,10 @@ public class RegexUnitTestDiscoverer : ITestDiscoverer
 
     private void DiscoverTestsInType(Type type, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
     {
-        // Discover fields with specific attributes
-        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Static))
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic ))
         {
-            // Check if the field has any of the desired attributes
             var hasRelevantAttribute = field.GetCustomAttributes()
-                .Any(attr => attr is ShouldMatchAttribute || attr is ShouldNotMatchAttribute || attr is InfoMatchAttribute);
+                .Any(attr => attr is ShouldMatchAttribute or ShouldNotMatchAttribute or InfoMatchAttribute);
 
             if (hasRelevantAttribute && field.FieldType == typeof(string))
             {
@@ -39,16 +38,14 @@ public class RegexUnitTestDiscoverer : ITestDiscoverer
             }
         }
 
-        // Discover properties with specific attributes
-        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Static))
+        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
         {
-            // Check if the property has any of the desired attributes
             var hasRelevantAttribute = property.GetCustomAttributes()
-                .Any(attr => attr is ShouldMatchAttribute || attr is ShouldNotMatchAttribute || attr is InfoMatchAttribute);
+                .Any(attr => attr is ShouldMatchAttribute or ShouldNotMatchAttribute or InfoMatchAttribute);
 
             if (hasRelevantAttribute && property.PropertyType == typeof(string))
             {
-                var propertyValue = property.GetValue(null); // Access static property without instance
+                var propertyValue = property.GetValue(null);
                 ProcessMember(property, propertyValue?.ToString(), type, logger, discoverySink);
             }
         }
@@ -56,12 +53,17 @@ public class RegexUnitTestDiscoverer : ITestDiscoverer
 
     private static void ProcessMember(MemberInfo member, string value, Type declaringType, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
     {
-        var attributes = member.GetCustomAttributes<Attribute>().Where(attr => attr is ShouldMatchAttribute || attr is ShouldNotMatchAttribute || attr is InfoMatchAttribute);
+        var attributes = member.GetCustomAttributes<Attribute>().OfType<IRegexUnitTester>();
         foreach (var attribute in attributes)
         {
-            var testCase = new TestCase($"{declaringType.FullName}.{member.Name}", new Uri("executor://RegexUnitTestExecutor"), member.Module.Assembly.Location)
+            var testData = attribute.TestData;
+
+            var fullyQualifiedName = $"{declaringType.FullName}.{member.Name}{testData}";
+            var testCase = new TestCase(fullyQualifiedName, new Uri("executor://RegexUnitTestExecutor"), member.Module.Assembly.Location)
             {
-                DisplayName = $"{declaringType.Name}.{member.Name}: {attribute.GetType().Name}"
+                DisplayName = $"{GetCaseKind(attribute.GetType())}: {member.Name} ({testData})",
+                CodeFilePath = attribute.FileName,
+                LineNumber = attribute.LineNumber
             };
 
             testCase.SetPropertyValue(TestPropertyItems.RegexPattern, value);
@@ -86,4 +88,12 @@ public class RegexUnitTestDiscoverer : ITestDiscoverer
         }
     }
 
+    private static readonly Dictionary<Type, string> AttributeToNameMap = new()
+    {
+        { typeof(ShouldMatchAttribute), "Should" },
+        { typeof(ShouldNotMatchAttribute), "Should not" },
+        { typeof(InfoMatchAttribute), "Info" }
+    };
+
+    private static string GetCaseKind(Type attributeType) => AttributeToNameMap[attributeType];
 }

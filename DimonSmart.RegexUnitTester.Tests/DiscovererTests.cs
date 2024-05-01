@@ -1,11 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Reflection;
+﻿using System.Reflection;
+using DimonSmart.RegexUnitTester.TestAdapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace RegexUnitTester.Tests
+namespace DimonSmart.RegexUnitTester.Tests
 {
     [TestClass]
     public class DiscovererTests
@@ -23,10 +24,10 @@ namespace RegexUnitTester.Tests
 
             discoverer.DiscoverTests(new[] { Assembly.GetExecutingAssembly().Location }, null, mockLogger.Object, mockDiscoverySink.Object);
 
-            Assert.IsTrue(testCases.Count > 0, "No test cases were discovered.");
-            Assert.IsTrue(testCases.Any(tc => tc.DisplayName.Contains("ShouldMatch")), "ShouldMatch attribute was not processed correctly.");
-            Assert.IsTrue(testCases.Any(tc => tc.DisplayName.Contains("ShouldNotMatch")), "ShouldNotMatch attribute was not processed correctly.");
-            Assert.IsTrue(testCases.Any(tc => tc.DisplayName.Contains("InfoMatch")), "InfoMatch attribute was not processed correctly.");
+            Assert.IsTrue(testCases.Count > 10, "No test cases were discovered.");
+            Assert.IsTrue(testCases.Any(tc => tc.DisplayName.Contains("Should")), "ShouldMatch attribute was not processed correctly.");
+            Assert.IsTrue(testCases.Any(tc => tc.DisplayName.Contains("Should not")), "ShouldNotMatch attribute was not processed correctly.");
+            Assert.IsTrue(testCases.Any(tc => tc.DisplayName.Contains("Info")), "InfoMatch attribute was not processed correctly.");
         }
     }
 }

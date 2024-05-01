@@ -1,7 +1,10 @@
 ﻿// ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
+
+using DimonSmart.RegexUnitTester.Attributes;
+
 #pragma warning disable CS0414 // Field is assigned but its value is never used
-namespace RegexUnitTester.Tests;
+namespace DimonSmart.RegexUnitTester.Tests;
 public class SampleTestClass
 {
     // Group: Public constants and static fields
@@ -20,10 +23,7 @@ public class SampleTestClass
     private const string PrivateValidRegexWithUnitTest = "abc";
     private const string PrivateValidRegexWithoutUnitTest = "def";
 
-    [ShouldMatch("Static regex pattern"), ShouldNotMatch("Non-static pattern"), InfoMatch("pattern")]
+    [InfoMatch("pattern"), ShouldMatch("Static regex pattern"), ShouldNotMatch("Non-static pattern")]
     private static string PrivateStaticValidRegexWithUnitTest = @"Static regex pattern";
     private static string PrivateStaticValidRegexWithoutUnitTest = @"Static regex pattern";
 }
-
-
-
