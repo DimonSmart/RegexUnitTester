@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel;
+using System.Reflection;
 using DimonSmart.RegexUnitTester.Attributes;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -10,6 +11,7 @@ namespace DimonSmart.RegexUnitTester.TestAdapter;
 [DefaultExecutorUri("executor://RegexUnitTestExecutor")]
 [FileExtension(".exe")]
 [FileExtension(".dll")]
+[Category("managed")]
 public class RegexUnitTestDiscoverer : ITestDiscoverer
 {
     public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)

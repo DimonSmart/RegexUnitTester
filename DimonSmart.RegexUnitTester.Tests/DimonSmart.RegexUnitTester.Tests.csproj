@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DimonSmart.RegexUnitTester.Attributes\DimonSmart.RegexUnitTester.Attributes.csproj" />
-    <ProjectReference Include="..\DimonSmart.RegexUnitTester\DimonSmart.RegexUnitTester.TestAdapter.csproj" />
+    <ProjectReference Include="..\DimonSmart.RegexUnitTester.TestAdapter\DimonSmart.RegexUnitTester.TestAdapter.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

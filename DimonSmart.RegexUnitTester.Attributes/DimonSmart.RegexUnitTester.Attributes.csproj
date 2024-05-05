@@ -1,37 +1,36 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Title>Regex unit tester attributes</Title>
-		<Description>
-			Attributes for marking strings (containing regular expressions) with
-			positive and negative matching samples.
-		</Description>
-		<Copyright>DimonSmart</Copyright>
-		<Authors>DimonSmart</Authors>
-		<PackageProjectUrl>https://github.com/DimonSmart/RegexUnitTester</PackageProjectUrl>
-		<PackageIcon>RegexTesterAttribute.png</PackageIcon>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/DimonSmart/RegexUnitTester</RepositoryUrl>
-		<PackageTags>Regex;RegularExpressions;UnitTests;Tests</PackageTags>
-		<PackageLicenseExpression>0BSD</PackageLicenseExpression>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>Regex unit tester attributes</Title>
+        <Description>Attributes for marking strings with positive and negative matching samples for regex testing.</Description>
+        <Authors>DimonSmart</Authors>
+        <Company>DimonSmart</Company>
+        <PackageId>DimonSmart.RegexUnitTester.Attributes</PackageId>
+        <PackageProjectUrl>https://github.com/DimonSmart/RegexUnitTester</PackageProjectUrl>
+        <PackageIcon>RegexTesterAttribute.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <RepositoryUrl>https://github.com/DimonSmart/RegexUnitTester</RepositoryUrl>
+        <PackageTags>Regex;RegularExpressions;UnitTests;Tests</PackageTags>
+        <PackageLicenseExpression>0BSD</PackageLicenseExpression>
+        <IncludeSymbols>true</IncludeSymbols>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <VersionPrefix>1.0.3</VersionPrefix>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<None Include="..\README.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
+    <!-- Include the README and Icon in the package root -->
+    <ItemGroup>
+        <None Include="..\README.md" Pack="True" PackagePath="/" />
+        <None Include="RegexTesterAttribute.png" Pack="True" PackagePath="/" />
+    </ItemGroup>
 
-	<ItemGroup>
-		<None Update="RegexTesterAttribute.png">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
+    <Target Name="PostBuild" AfterTargets="Pack">
+        <Copy
+            SourceFiles="$(OutputPath)..\$(PackageId).$(Version).nupkg"
+            DestinationFolder="C:\Nuget\" />
+    </Target>
 
 </Project>
