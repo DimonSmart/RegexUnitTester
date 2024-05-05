@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-
+namespace DimonSmart.RegexUnitTester.TestAdapter;
 
 public static class TestPropertyItems
 {
