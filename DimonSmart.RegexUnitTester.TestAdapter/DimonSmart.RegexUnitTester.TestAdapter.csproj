@@ -41,7 +41,7 @@
     </None>
     <None Include="RegexUnitTesterAdapter.props">
       <Pack>true</Pack>
-      <PackagePath>build\net6.0</PackagePath>
+      <PackagePath>build\$(TargetFramework)\</PackagePath>
     </None>
   </ItemGroup>
 
