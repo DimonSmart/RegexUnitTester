@@ -1,4 +1,5 @@
 dotnet clean
-dotnet build -c Debug
-dotnet pack -c Debug
+dotnet build -c Release
+dotnet pack -c Release
+
 

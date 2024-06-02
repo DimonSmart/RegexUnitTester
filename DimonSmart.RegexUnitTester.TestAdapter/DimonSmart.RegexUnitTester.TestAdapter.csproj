@@ -30,15 +30,10 @@
     <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" Version="1.1.0" />
   </ItemGroup>
 
+
   <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>true</Pack>
-      <PackagePath />
-    </None>
-    <None Include="RegexUnitTesterAdapter.png">
-      <Pack>true</Pack>
-      <PackagePath />
-    </None>
+      <None Include="..\README.md" Pack="True" PackagePath="/" />
+      <None Include="RegexUnitTesterAdapter.png" Pack="True" PackagePath="/" />
   </ItemGroup>
 
   <ItemGroup>

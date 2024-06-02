@@ -19,27 +19,15 @@
     <RepositoryUrl>https://github.com/DimonSmart/RegexUnitTester</RepositoryUrl>
     <PackageTags>Regex;RegularExpressions;UnitTests;Tests</PackageTags>
     <PackageLicenseExpression>0BSD</PackageLicenseExpression>
-    <IncludeSymbols>true</IncludeSymbols>
     <LangVersion>latest</LangVersion>
     <Deterministic>true</Deterministic>
     <PackageVersion>1.$([System.DateTime]::UtcNow.ToString("yyMdd")).$([System.DateTime]::UtcNow.ToString("HHmm"))</PackageVersion>
     <Version>1.$([System.DateTime]::UtcNow.ToString("yyMdd")).$([System.DateTime]::UtcNow.ToString("HHmm"))</Version>
   </PropertyGroup>
 
-    <ItemGroup>
-        <None Include="..\README.md" Pack="True" PackagePath="/" />
-        <None Include="RegexTesterAttribute.png" Pack="True" PackagePath="/" />
-    </ItemGroup>
-
   <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>true</Pack>
-      <PackagePath />
-    </None>
-    <None Include="RegexTesterAttribute.png">
-      <Pack>true</Pack>
-      <PackagePath />
-    </None>
+      <None Include="..\README.md" Pack="True" PackagePath="/" />
+      <None Include="RegexTesterAttribute.png" Pack="True" PackagePath="/" />
   </ItemGroup>
 
 </Project>
