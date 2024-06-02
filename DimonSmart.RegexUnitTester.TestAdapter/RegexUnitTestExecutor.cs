@@ -10,32 +10,15 @@ public class RegexUnitTestExecutor : ITestExecutor
 {
     private bool _isCancelled;
 
-    public void RunTests(IEnumerable<TestCase> testCases, IRunContext runContext, IFrameworkHandle frameworkHandle)
+    void ITestExecutor.RunTests(IEnumerable<TestCase>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
-        foreach (var testCase in testCases)
-        {
-            if (_isCancelled) break;
-
-            frameworkHandle.RecordStart(testCase);
-            try
-            {
-                ExecuteTest(testCase, frameworkHandle);
-            }
-            catch (Exception ex)
-            {
-                frameworkHandle.RecordResult(new TestResult(testCase)
-                {
-                    Outcome = TestOutcome.Failed,
-                    ErrorMessage = ex.Message,
-                    ErrorStackTrace = ex.StackTrace
-                });
-            }
-            frameworkHandle.RecordEnd(testCase, TestOutcome.Passed);
-        }
+        if (tests == null) return;
+        RunTestCases(tests, frameworkHandle);
     }
 
-    private void ExecuteTest(TestCase testCase, IFrameworkHandle frameworkHandle)
+    private void ExecuteTest(TestCase testCase, IFrameworkHandle? frameworkHandle)
     {
+        if (frameworkHandle == null) return;
         var regexPattern = testCase.GetPropertyValue<string>(TestPropertyItems.RegexPattern, string.Empty);
         var regex = new Regex(regexPattern);
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{testCase.DisplayName}");
@@ -46,7 +29,6 @@ public class RegexUnitTestExecutor : ITestExecutor
             if (regex.GroupNumberFromName(groupName) != 0)
                 frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{groupName}: {regex.GroupNumberFromName(groupName)}");
         }
-
 
         frameworkHandle.RecordStart(testCase);
 
@@ -94,14 +76,71 @@ public class RegexUnitTestExecutor : ITestExecutor
         }
     }
 
-
     public void Cancel()
     {
         _isCancelled = true;
     }
 
-    public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
+    public void RunTests(IEnumerable<string>? sources, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
-        // This method can be implemented if needed
+        if (sources == null) return;
+        // Debugger.Launch();
+        var testCases = new List<TestCase>();
+        var discoverySink = new TestCaseDiscoverySink();
+
+        var discoverer = new RegexUnitTestDiscoverer();
+        var logger = new MessageLogger();
+
+
+        foreach (var source in sources)
+            discoverer.DiscoverTests(new[] { source }, null, logger, discoverySink);
+
+        RunTestCases(testCases, frameworkHandle);
     }
+
+    private void RunTestCases(IEnumerable<TestCase> testCases, IFrameworkHandle? frameworkHandle)
+    {
+        if (frameworkHandle == null) return;
+        if (testCases == null) return;
+
+        foreach (var testCase in testCases)
+        {
+            if (_isCancelled) break;
+
+            frameworkHandle?.RecordStart(testCase);
+            try
+            {
+                ExecuteTest(testCase, frameworkHandle);
+            }
+            catch (Exception ex)
+            {
+                frameworkHandle?.RecordResult(new TestResult(testCase)
+                {
+                    Outcome = TestOutcome.Failed,
+                    ErrorMessage = ex.Message,
+                    ErrorStackTrace = ex.StackTrace
+                });
+            }
+            frameworkHandle?.RecordEnd(testCase, TestOutcome.Passed);
+        }
+    }
+
+    private class MessageLogger : IMessageLogger
+    {
+        public void SendMessage(TestMessageLevel testMessageLevel, string message)
+        {
+            Console.WriteLine($"{testMessageLevel}: {message}");
+        }
+    }
+
+    private class TestCaseDiscoverySink : ITestCaseDiscoverySink
+    {
+        public List<TestCase> TestCases { get; } = new List<TestCase>();
+
+        public void SendTestCase(TestCase testCase)
+        {
+            TestCases.Add(testCase);
+        }
+    }
+
 }

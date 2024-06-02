@@ -1,7 +1,0 @@
-<Project>
-	<ItemGroup>
-		<TestAdapter>
-			<TestAdapterFile>$(MSBuildThisFileDirectory)RegexUnitTesterAdapter.dll</TestAdapterFile>
-		</TestAdapter>
-	</ItemGroup>
-</Project>

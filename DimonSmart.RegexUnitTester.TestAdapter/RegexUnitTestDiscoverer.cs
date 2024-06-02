@@ -28,7 +28,7 @@ public class RegexUnitTestDiscoverer : ITestDiscoverer
 
     private void DiscoverTestsInType(Type type, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
     {
-        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic ))
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
         {
             var hasRelevantAttribute = field.GetCustomAttributes()
                 .Any(attr => attr is ShouldMatchAttribute or ShouldNotMatchAttribute or InfoMatchAttribute);
