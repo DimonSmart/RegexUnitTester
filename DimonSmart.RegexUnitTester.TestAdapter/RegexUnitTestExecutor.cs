@@ -84,19 +84,19 @@ public class RegexUnitTestExecutor : ITestExecutor
     public void RunTests(IEnumerable<string>? sources, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
         if (sources == null) return;
-        // Debugger.Launch();
-        var testCases = new List<TestCase>();
-        var discoverySink = new TestCaseDiscoverySink();
 
+        var discoverySink = new TestCaseDiscoverySink();
         var discoverer = new RegexUnitTestDiscoverer();
         var logger = new MessageLogger();
 
-
         foreach (var source in sources)
-            discoverer.DiscoverTests(new[] { source }, null, logger, discoverySink);
+        {
+            discoverer.DiscoverTests(new[] { source }, NullDiscoveryContext.Instance, logger, discoverySink);
+        }
 
-        RunTestCases(testCases, frameworkHandle);
+        RunTestCases(discoverySink.TestCases, frameworkHandle);
     }
+
 
     private void RunTestCases(IEnumerable<TestCase> testCases, IFrameworkHandle? frameworkHandle)
     {
