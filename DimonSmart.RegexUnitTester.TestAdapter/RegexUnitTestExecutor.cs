@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -20,9 +21,20 @@ public class RegexUnitTestExecutor : ITestExecutor
     {
         if (frameworkHandle == null) return;
         var regexPattern = testCase.GetPropertyValue<string>(TestPropertyItems.RegexPattern, string.Empty);
-        var regex = new Regex(regexPattern);
+
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{testCase.DisplayName}");
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Regex:{regexPattern}");
+
+        Regex regex;
+        try
+        {
+            regex = new Regex(regexPattern);
+        }
+        catch (RegexParseException exception)
+        {
+            RecordResult(false, exception.Message);
+            return;
+        }
 
         foreach (var groupName in regex.GetGroupNames())
         {

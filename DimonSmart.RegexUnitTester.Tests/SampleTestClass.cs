@@ -26,4 +26,7 @@ public class SampleTestClass
     [InfoMatch("pattern"), ShouldMatch("Static regex pattern"), ShouldNotMatch("Non-static pattern")]
     private static string PrivateStaticValidRegexWithUnitTest = @"Static regex pattern";
     private static string PrivateStaticValidRegexWithoutUnitTest = @"Static regex pattern";
+
+    [InfoMatch("123-12-1234")]
+    private static string RegexWithError = @"(\d{3}-\d{2}-\d{4}";
 }
