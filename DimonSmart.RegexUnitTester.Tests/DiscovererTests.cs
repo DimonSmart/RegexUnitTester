@@ -22,7 +22,7 @@ namespace DimonSmart.RegexUnitTester.Tests
             mockDiscoverySink.Setup(x => x.SendTestCase(It.IsAny<TestCase>()))
                 .Callback<TestCase>(testCase => testCases.Add(testCase));
 
-            discoverer.DiscoverTests(new[] { Assembly.GetExecutingAssembly().Location }, null, mockLogger.Object, mockDiscoverySink.Object);
+            discoverer.DiscoverTests(new[] { Assembly.GetExecutingAssembly().Location }, NullDiscoveryContext.Instance, mockLogger.Object, mockDiscoverySink.Object);
 
             Assert.IsTrue(testCases.Count > 10, "No test cases were discovered.");
             Assert.IsTrue(testCases.Any(tc => tc.DisplayName.Contains("Should")), "ShouldMatch attribute was not processed correctly.");

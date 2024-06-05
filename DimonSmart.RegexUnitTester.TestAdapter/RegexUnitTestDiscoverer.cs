@@ -4,13 +4,13 @@ using DimonSmart.RegexUnitTester.Attributes;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-
+using static DimonSmart.RegexUnitTester.TestAdapter.RegexUnitTestConstants;
 namespace DimonSmart.RegexUnitTester.TestAdapter;
 
-[ExtensionUri("executor://RegexUnitTestExecutor")]
-[DefaultExecutorUri("executor://RegexUnitTestExecutor")]
-[FileExtension(".exe")]
-[FileExtension(".dll")]
+[ExtensionUri(RegexUnitTestExecutorUriString)]
+[DefaultExecutorUri(RegexUnitTestExecutorUriString)]
+[FileExtension(ExeFileExtension)]
+[FileExtension(DllFileExtension)]
 [Category("managed")]
 public class RegexUnitTestDiscoverer : ITestDiscoverer
 {
@@ -35,8 +35,11 @@ public class RegexUnitTestDiscoverer : ITestDiscoverer
 
             if (hasRelevantAttribute && field.FieldType == typeof(string))
             {
-                var fieldValue = field.GetValue(null);
-                ProcessMember(field, fieldValue?.ToString(), type, logger, discoverySink);
+                var fieldValue = field.GetValue(null) as string;
+                if (fieldValue is not null)
+                {
+                    ProcessMember(field, fieldValue, type, logger, discoverySink);
+                }
             }
         }
 
@@ -47,8 +50,11 @@ public class RegexUnitTestDiscoverer : ITestDiscoverer
 
             if (hasRelevantAttribute && property.PropertyType == typeof(string))
             {
-                var propertyValue = property.GetValue(null);
-                ProcessMember(property, propertyValue?.ToString(), type, logger, discoverySink);
+                var propertyValue = property.GetValue(null) as string;
+                if (propertyValue is not null)
+                {
+                    ProcessMember(property, propertyValue, type, logger, discoverySink);
+                }
             }
         }
     }
