@@ -48,17 +48,33 @@ public class RegexUnitTestExecutor : ITestExecutor
         if (testCase.GetPropertyValue<string>(TestPropertyItems.InfoOnly, string.Empty) is { } infoOnly && !string.IsNullOrEmpty(infoOnly))
         {
             var infoMatch = regex.Match(infoOnly);
-            RecordResult(true, $"InfoOnly test executed, pattern tested: '{infoOnly}', matched: {infoMatch.Success}", true);
+            var status = GetStatusText(infoMatch.Success);
+            RecordResult(infoMatch.Success,
+                $"Status: {status}" +
+                $"{Environment.NewLine}" +
+                $"Pattern: '{regexPattern}'" +
+                $"{Environment.NewLine}" +
+                $"Text: '{infoOnly}'" +
+                $"{Environment.NewLine}" +
+                $"Info: This match if informational only");
         }
 
         // Expected match test
         if (testCase.GetPropertyValue<string>(TestPropertyItems.ExpectedMatch, string.Empty) is { } expectedMatch && !string.IsNullOrEmpty(expectedMatch))
         {
             var matchResult = regex.Match(expectedMatch);
-            RecordResult(matchResult.Success, $"Expected Match test, pattern: '{expectedMatch}', matched: {matchResult.Success}");
+            var status = GetStatusText(matchResult.Success);
+            RecordResult(matchResult.Success,
+                $"Status: {status}" +
+                $"{Environment.NewLine}" +
+                $"Pattern: '{regexPattern}'" +
+                $"{Environment.NewLine}" +
+                $"Text: '{expectedMatch}'" +
+                $"{Environment.NewLine}" +
+                $"Info: Pattern should match text");
         }
 
-        // Must not match test
+        // Should not match test
         if (testCase.GetPropertyValue<string>(TestPropertyItems.MustNotMatch, string.Empty) is { } mustNotMatch && !string.IsNullOrEmpty(mustNotMatch))
         {
             var matchResult = regex.Match(mustNotMatch);
