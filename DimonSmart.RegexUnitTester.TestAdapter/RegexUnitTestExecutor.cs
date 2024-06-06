@@ -62,7 +62,15 @@ public class RegexUnitTestExecutor : ITestExecutor
         if (testCase.GetPropertyValue<string>(TestPropertyItems.MustNotMatch, string.Empty) is { } mustNotMatch && !string.IsNullOrEmpty(mustNotMatch))
         {
             var matchResult = regex.Match(mustNotMatch);
-            RecordResult(!matchResult.Success, $"MustNotMatch test, pattern: '{mustNotMatch}', should not match but did: {matchResult.Success}");
+            var status = GetStatusText(!matchResult.Success);
+            RecordResult(!matchResult.Success,
+                $"Status: {status}" +
+                $"{Environment.NewLine}" +
+                $"Pattern: '{regexPattern}'" +
+                $"{Environment.NewLine}" +
+                $"Text: '{mustNotMatch}'" +
+                $"{Environment.NewLine}" +
+                $"Info: Pattern should not match text");
         }
 
         // General test in case no specific instructions provided
@@ -87,6 +95,8 @@ public class RegexUnitTestExecutor : ITestExecutor
             });
         }
     }
+
+    private static string GetStatusText(bool success) => success ? "PASSED" : "FAILED";
 
     public void Cancel()
     {
