@@ -29,4 +29,7 @@ public class SampleTestClass
 
     [InfoMatch("123-12-1234")]
     private static string RegexWithError = @"(\d{3}-\d{2}-\d{4}";
+
+    [ShouldNotMatch("123_12-1234")]
+    private static string SSN = @"(\d{3}-\d{2}-\d{4})";
 }
