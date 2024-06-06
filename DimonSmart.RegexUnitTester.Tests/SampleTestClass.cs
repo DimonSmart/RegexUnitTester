@@ -9,28 +9,23 @@ public class SampleTestClass
 {
     // Group: Public constants and static fields
 
-    [ShouldMatch("abc"), ShouldNotMatch("xyz"), InfoMatch("a b c")]
-    public const string PublicValidRegexWithUnitTest = "abc";
-    public const string PublicValidRegexWithoutUnitTest = "def";
+    [ShouldMatch("abc"), ShouldNotMatch("xyz"), InfoMatch("abc"), InfoMatch("a-b-c")]
+    public const string PublicConstABC = "abc";
+    public const string PublicConstDEF_not_UnitTested = "def";
 
-    [ShouldMatch("Static regex pattern"), ShouldNotMatch("Non-static pattern"), InfoMatch("pattern")]
-    public static string PublicStaticValidRegexWithUnitTest = @"Static regex pattern";
-    public static string PublicStaticValidRegexWithoutUnitTest = @"Static regex pattern";
+    [ShouldMatch("abc"), ShouldNotMatch("a-b-c"), InfoMatch("abc a-b-c")]
+    public static string PublicStaticABC = @"abc";
 
-    // Group: Private copies of the above constants and static fields for internal use
+    [ShouldMatch("abc"), ShouldNotMatch("xyz"), InfoMatch("abc")]
+    private const string PrivateConstABC = "abc";
 
-    [ShouldMatch("abc"), ShouldNotMatch("xyz"), InfoMatch("a-b-c")]
-    private const string PrivateValidRegexWithUnitTest = "abc";
-    private const string PrivateValidRegexWithoutUnitTest = "def";
-
-    [InfoMatch("pattern"), ShouldMatch("Static regex pattern"), ShouldNotMatch("Non-static pattern")]
-    private static string PrivateStaticValidRegexWithUnitTest = @"Static regex pattern";
-    private static string PrivateStaticValidRegexWithoutUnitTest = @"Static regex pattern";
+    [ShouldMatch("abc"), ShouldNotMatch("a-b-c"), InfoMatch("abc a-b-c")]
+    private static string PrivateStaticABC = @"abc";
 
     [InfoMatch("123-12-1234")]
     private static string RegexWithError = @"(\d{3}-\d{2}-\d{4}";
 
     [ShouldNotMatch("123_12-1234")]
     [ShouldMatch("123-12-1234")]
-    private static string SSN = @"(\d{3}-\d{2}-\d{4})";
+    private static string SSN = @"(?<Area>\d{3})-(?<Group>\d{2})-(?<Serial>\d{4})(?<OptionalPart>-\d{2})?";
 }
