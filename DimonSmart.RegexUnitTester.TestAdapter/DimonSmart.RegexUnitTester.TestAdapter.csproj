@@ -25,6 +25,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DimonSmart.RegexUnitTester.Attributes" Version="1.24605.2215" />
     <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.9.0" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.9.0" />
     <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" Version="1.1.0" />
@@ -34,10 +35,6 @@
   <ItemGroup>
       <None Include="..\README.md" Pack="True" PackagePath="/" />
       <None Include="RegexUnitTesterAdapter.png" Pack="True" PackagePath="/" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\DimonSmart.RegexUnitTester.Attributes\DimonSmart.RegexUnitTester.Attributes.csproj" />
   </ItemGroup>
 
 </Project>
