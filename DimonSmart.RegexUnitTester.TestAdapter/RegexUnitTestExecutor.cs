@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DimonSmart.RegexUnitTester.TestAdapter;
 
@@ -45,48 +45,33 @@ public class RegexUnitTestExecutor : ITestExecutor
         frameworkHandle.RecordStart(testCase);
 
         // Informational test
-        if (testCase.GetPropertyValue<string>(TestPropertyItems.InfoOnly, string.Empty) is { } infoOnly && !string.IsNullOrEmpty(infoOnly))
+        if (testCase.GetPropertyValue<string>(
+            TestPropertyItems.InfoOnly, string.Empty) is { } infoMatchText && !string.IsNullOrEmpty(infoMatchText))
         {
-            var infoMatch = regex.Match(infoOnly);
-            var status = GetStatusText(infoMatch.Success);
-            RecordResult(infoMatch.Success,
-                $"Status: {status}" +
-                $"{Environment.NewLine}" +
-                $"Pattern: '{regexPattern}'" +
-                $"{Environment.NewLine}" +
-                $"Text: '{infoOnly}'" +
-                $"{Environment.NewLine}" +
-                $"Info: This match if informational only");
+            var matchResult = regex.Match(infoMatchText);
+            var status = matchResult.Success ? "MATCHED" : "NOT_MATCHED";
+            var description = GetDescription(regexPattern, infoMatchText, matchResult, status);
+            RecordResult(true, description);
         }
 
-        // Expected match test
-        if (testCase.GetPropertyValue<string>(TestPropertyItems.ExpectedMatch, string.Empty) is { } expectedMatch && !string.IsNullOrEmpty(expectedMatch))
+        // Should match test
+        if (testCase.GetPropertyValue<string>(
+            TestPropertyItems.ExpectedMatch, string.Empty) is { } expectedMatchText && !string.IsNullOrEmpty(expectedMatchText))
         {
-            var matchResult = regex.Match(expectedMatch);
+            var matchResult = regex.Match(expectedMatchText);
             var status = GetStatusText(matchResult.Success);
-            RecordResult(matchResult.Success,
-                $"Status: {status}" +
-                $"{Environment.NewLine}" +
-                $"Pattern: '{regexPattern}'" +
-                $"{Environment.NewLine}" +
-                $"Text: '{expectedMatch}'" +
-                $"{Environment.NewLine}" +
-                $"Info: Pattern should match text");
+            var description = GetDescription(regexPattern, expectedMatchText, matchResult, status);
+            RecordResult(matchResult.Success, description);
         }
 
         // Should not match test
-        if (testCase.GetPropertyValue<string>(TestPropertyItems.MustNotMatch, string.Empty) is { } mustNotMatch && !string.IsNullOrEmpty(mustNotMatch))
+        if (testCase.GetPropertyValue<string>(
+            TestPropertyItems.MustNotMatch, string.Empty) is { } shouldNotMatchText && !string.IsNullOrEmpty(shouldNotMatchText))
         {
-            var matchResult = regex.Match(mustNotMatch);
+            var matchResult = regex.Match(shouldNotMatchText);
             var status = GetStatusText(!matchResult.Success);
-            RecordResult(!matchResult.Success,
-                $"Status: {status}" +
-                $"{Environment.NewLine}" +
-                $"Pattern: '{regexPattern}'" +
-                $"{Environment.NewLine}" +
-                $"Text: '{mustNotMatch}'" +
-                $"{Environment.NewLine}" +
-                $"Info: Pattern should not match text");
+            var description = GetDescription(regexPattern, shouldNotMatchText, matchResult, status);
+            RecordResult(!matchResult.Success, description);
         }
 
         // General test in case no specific instructions provided
@@ -112,7 +97,45 @@ public class RegexUnitTestExecutor : ITestExecutor
         }
     }
 
+    private string GetDescription(string regexPattern, string expectedMatch, Match matchResult, string status)
+    {
+        var details = GetMatchDetails(matchResult);
+
+        details = string.IsNullOrEmpty(details) ? string.Empty :
+                        $"{Environment.NewLine}" +
+                        $"{Environment.NewLine}" +
+                        $"Details:" +
+                        $"{Environment.NewLine}" +
+                        details;
+
+        return $"Status: {status}" +
+                        $"{Environment.NewLine}" +
+                        $"Pattern: '{regexPattern}'" +
+                        $"{Environment.NewLine}" +
+                        $"Text: '{expectedMatch}'" +
+                        details;
+    }
+
     private static string GetStatusText(bool success) => success ? "PASSED" : "FAILED";
+
+    private string GetMatchDetails(Match match)
+    {
+        if (!match.Success) return string.Empty;
+
+        var details = new StringBuilder();
+
+        for (int i = 0; i < match.Groups.Count; i++)
+        {
+            var group = match.Groups[i];
+            var groupName = string.IsNullOrEmpty(group.Name) ? i.ToString() : group.Name;
+            var successStatus = group.Success ? "Ok" : "No";
+            var line = $"Group {groupName}: '{group.Value}' (Position: {group.Index}, Length: {group.Length}, Status: {successStatus})";
+
+            details.AppendLine(line);
+        }
+
+        return details.ToString().TrimEnd('\r', '\n');
+    }
 
     public void Cancel()
     {
