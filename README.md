@@ -1,7 +1,9 @@
-# DimonSmart.RegexUnitTester.TestAdapter
+﻿# DimonSmart.RegexUnitTester.TestAdapter
+
+🔵 **Easily test your regex patterns without writing a single line of code!**
 
 ## Overview
-**Easily test your regex patterns without writing a single line of code!** The `DimonSmart.RegexUnitTester.TestAdapter` leverages custom attributes to automatically generate and execute regex tests, streamlining your testing process by eliminating the need for manual test script writing.
+ The `DimonSmart.RegexUnitTester.TestAdapter` leverages custom attributes to automatically generate and execute regex tests, streamlining your testing process by eliminating the need for manual test script writing.
 
 ## Features
 - **Purpose:** Automatically runs unit tests for regex patterns using specialized attributes:
