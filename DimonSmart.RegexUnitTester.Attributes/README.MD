@@ -59,4 +59,8 @@ For automated testing integration, consider using the `DimonSmart.RegexUnitTeste
 Install-Package DimonSmart.RegexUnitTester.TestAdapter
 ```
 [Find out more about the TestAdapter package here](https://nuget.org/packages/DimonSmart.RegexUnitTester.TestAdapter)
-```
+
+## License
+This project is licensed under the **0BSD License**, which is one of the most permissive licenses available. This means that the `DimonSmart.RegexUnitTester.Attributes` are **completely free** for both personal and commercial use. You are allowed to use, modify, and distribute the software without any restrictions.
+
+For more details on the license, you can review it [here](https://opensource.org/licenses/0BSD).
