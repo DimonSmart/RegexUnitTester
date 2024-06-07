@@ -1,6 +1,7 @@
-# DimonSmart.RegexUnitTester.Attributes
+﻿# DimonSmart.RegexUnitTester.Attributes
 
-![Attribute Only](https://example.com/attribute-only-label.png)
+⚠ - [This package is for attributes only! for TestAdapter please check TestAdapter package](https://nuget.org/packages/DimonSmart.RegexUnitTester.TestAdapter)
+
 
 ## Overview
 The `DimonSmart.RegexUnitTester.Attributes` NuGet package enhances regex testing by using custom attributes to specify test cases and document regex behaviors. This package focuses solely on providing attribute tools for marking test cases directly in your code, improving code readability and documentation.
