@@ -1,9 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using static System.AttributeTargets;
 
 namespace DimonSmart.RegexUnitTester.Attributes;
 
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
+[AttributeUsage(Field | Property | Method, AllowMultiple = true)]
 public class InfoMatchAttribute : Attribute, IRegexUnitTester
 {
     public InfoMatchAttribute(string testData, RegexOptions regexOptions = RegexOptions.None,
