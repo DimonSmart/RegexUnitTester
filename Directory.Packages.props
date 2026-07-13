@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+    <PackageVersion Include="Microsoft.TestPlatform.AdapterUtilities" Version="18.0.0" />
+    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="18.0.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.0.0" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.0.0" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.0.0" />
+    <PackageVersion Include="Moq" Version="4.20.70" />
+  </ItemGroup>
+</Project>

@@ -4,10 +4,9 @@
     <Configuration>Release</Configuration>
     <IsPackable>true</IsPackable>
     <OutputType>Library</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Title>Regex unit tester unit test adapter</Title>
     <Description>Attribute based Regex unit test adapter</Description>
     <Authors>DimonSmart</Authors>
@@ -20,17 +19,17 @@
     <PackageLicenseExpression>0BSD</PackageLicenseExpression>
     <LangVersion>latest</LangVersion>
     <Deterministic>true</Deterministic>
-    <PackageVersion>1.$([System.DateTime]::UtcNow.ToString("yyMdd")).$([System.DateTime]::UtcNow.ToString("HHmm"))</PackageVersion>
-    <Version>1.$([System.DateTime]::UtcNow.ToString("yyMdd")).$([System.DateTime]::UtcNow.ToString("HHmm"))</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DimonSmart.RegexUnitTester.Attributes" Version="1.24605.2215" />
-    <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.9.0" />
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.9.0" />
-    <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" Version="1.1.0" />
+    <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DimonSmart.RegexUnitTester.Attributes\DimonSmart.RegexUnitTester.Attributes.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
       <None Include="..\README.md" Pack="True" PackagePath="/" />

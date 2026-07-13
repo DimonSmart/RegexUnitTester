@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageReference Include="Moq" Version="4.20.70" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.3.1" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.3.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Moq" />
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="MSTest.TestFramework" />
+    <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" />
   </ItemGroup>
 
   <ItemGroup>
@@ -13,13 +14,15 @@
   </ItemGroup>
 
   <PropertyGroup>
-	<TargetFrameworks>net7.0</TargetFrameworks>
-    <LangVersion>preview</LangVersion>
+	<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<IsTestProject>true</IsTestProject>
-	<EnableMSTestRunner>true</EnableMSTestRunner>
-	<TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+	<ParallelizeTestCollections>false</ParallelizeTestCollections>
+	<EnableMSTestRunner Condition="'$(UseMtp)' == 'true'">true</EnableMSTestRunner>
+	<TestingPlatformDotnetTestSupport Condition="'$(UseMtp)' == 'true'">true</TestingPlatformDotnetTestSupport>
+	<OutputType Condition="'$(UseMtp)' == 'true'">Exe</OutputType>
   </PropertyGroup>
 
 </Project>

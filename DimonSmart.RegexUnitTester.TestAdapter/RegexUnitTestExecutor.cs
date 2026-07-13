@@ -1,207 +1,109 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace DimonSmart.RegexUnitTester.TestAdapter;
 
-[ExtensionUri("executor://RegexUnitTestExecutor")]
-public class RegexUnitTestExecutor : ITestExecutor
+[ExtensionUri(RegexUnitTestConstants.RegexUnitTestExecutorUriString)]
+public sealed class RegexUnitTestExecutor : ITestExecutor
 {
-    private bool _isCancelled;
-
-    void ITestExecutor.RunTests(IEnumerable<TestCase>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
-    {
-        if (tests == null) return;
-        RunTestCases(tests, frameworkHandle);
-    }
-
-    private void ExecuteTest(TestCase testCase, IFrameworkHandle? frameworkHandle)
-    {
-        if (frameworkHandle == null) return;
-        var regexPattern = testCase.GetPropertyValue<string>(TestPropertyItems.RegexPattern, string.Empty);
-
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{testCase.DisplayName}");
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Regex:{regexPattern}");
-
-        Regex regex;
-        try
-        {
-            regex = new Regex(regexPattern);
-        }
-        catch (RegexParseException exception)
-        {
-            RecordResult(false, exception.Message);
-            return;
-        }
-
-        foreach (var groupName in regex.GetGroupNames())
-        {
-            if (regex.GroupNumberFromName(groupName) != 0)
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{groupName}: {regex.GroupNumberFromName(groupName)}");
-        }
-
-        frameworkHandle.RecordStart(testCase);
-
-        // Informational test
-        if (testCase.GetPropertyValue<string>(
-            TestPropertyItems.InfoOnly, string.Empty) is { } infoMatchText && !string.IsNullOrEmpty(infoMatchText))
-        {
-            var matchResult = regex.Match(infoMatchText);
-            var status = matchResult.Success ? "MATCHED" : "NOT_MATCHED";
-            var description = GetDescription(regexPattern, infoMatchText, matchResult, status);
-            RecordResult(true, description);
-        }
-
-        // Should match test
-        if (testCase.GetPropertyValue<string>(
-            TestPropertyItems.ExpectedMatch, string.Empty) is { } expectedMatchText && !string.IsNullOrEmpty(expectedMatchText))
-        {
-            var matchResult = regex.Match(expectedMatchText);
-            var status = GetStatusText(matchResult.Success);
-            var description = GetDescription(regexPattern, expectedMatchText, matchResult, status);
-            RecordResult(matchResult.Success, description);
-        }
-
-        // Should not match test
-        if (testCase.GetPropertyValue<string>(
-            TestPropertyItems.MustNotMatch, string.Empty) is { } shouldNotMatchText && !string.IsNullOrEmpty(shouldNotMatchText))
-        {
-            var matchResult = regex.Match(shouldNotMatchText);
-            var status = GetStatusText(!matchResult.Success);
-            var description = GetDescription(regexPattern, shouldNotMatchText, matchResult, status);
-            RecordResult(!matchResult.Success, description);
-        }
-
-        // General test in case no specific instructions provided
-        if (string.IsNullOrEmpty(testCase.GetPropertyValue<string>(TestPropertyItems.ExpectedMatch, string.Empty)) &&
-            string.IsNullOrEmpty(testCase.GetPropertyValue<string>(TestPropertyItems.MustNotMatch, string.Empty)) &&
-            string.IsNullOrEmpty(testCase.GetPropertyValue<string>(TestPropertyItems.InfoOnly, string.Empty)))
-        {
-            RecordResult(true, "No specific match requirements provided; regex tested without specific assertions.");
-        }
-
-        return;
-
-        void RecordResult(bool isSuccess, string message, bool isInformational = false)
-        {
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, message);
-
-            frameworkHandle.RecordResult(new TestResult(testCase)
-            {
-                Outcome = isInformational ? TestOutcome.Passed : (isSuccess ? TestOutcome.Passed : TestOutcome.Failed),
-                DisplayName = testCase.DisplayName,
-                Messages = { new TestResultMessage(isSuccess ? TestResultMessage.StandardOutCategory : TestResultMessage.StandardErrorCategory, message) }
-            });
-        }
-    }
-
-    private string GetDescription(string regexPattern, string expectedMatch, Match matchResult, string status)
-    {
-        var details = GetMatchDetails(matchResult);
-
-        details = string.IsNullOrEmpty(details) ? string.Empty :
-                        $"{Environment.NewLine}" +
-                        $"{Environment.NewLine}" +
-                        $"Details:" +
-                        $"{Environment.NewLine}" +
-                        details;
-
-        return $"Status: {status}" +
-                        $"{Environment.NewLine}" +
-                        $"Pattern: '{regexPattern}'" +
-                        $"{Environment.NewLine}" +
-                        $"Text: '{expectedMatch}'" +
-                        details;
-    }
-
-    private static string GetStatusText(bool success) => success ? "PASSED" : "FAILED";
-
-    private string GetMatchDetails(Match match)
-    {
-        if (!match.Success) return string.Empty;
-
-        var details = new StringBuilder();
-
-        for (int i = 0; i < match.Groups.Count; i++)
-        {
-            var group = match.Groups[i];
-            var groupName = string.IsNullOrEmpty(group.Name) ? i.ToString() : group.Name;
-            var successStatus = group.Success ? "Ok" : "No";
-            var line = $"Group {groupName}: '{group.Value}' (Position: {group.Index}, Length: {group.Length}, Status: {successStatus})";
-
-            details.AppendLine(line);
-        }
-
-        return details.ToString().TrimEnd('\r', '\n');
-    }
-
-    public void Cancel()
-    {
-        _isCancelled = true;
-    }
+    private volatile bool _isCancelled;
 
     public void RunTests(IEnumerable<string>? sources, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
-        if (sources == null) return;
-
-        var discoverySink = new TestCaseDiscoverySink();
-        var discoverer = new RegexUnitTestDiscoverer();
-        var logger = new MessageLogger();
-
-        foreach (var source in sources)
-        {
-            discoverer.DiscoverTests(new[] { source }, NullDiscoveryContext.Instance, logger, discoverySink);
-        }
-
-        RunTestCases(discoverySink.TestCases, frameworkHandle);
+        if (sources is null || frameworkHandle is null) return;
+        var sink = new TestCaseDiscoverySink();
+        new RegexUnitTestDiscoverer().DiscoverTests(sources, NullDiscoveryContext.Instance, new FrameworkLogger(frameworkHandle), sink);
+        RunTestCases(sink.TestCases, frameworkHandle);
     }
 
-
-    private void RunTestCases(IEnumerable<TestCase> testCases, IFrameworkHandle? frameworkHandle)
+    void ITestExecutor.RunTests(IEnumerable<TestCase>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
-        if (frameworkHandle == null) return;
-        if (testCases == null) return;
+        if (tests is not null && frameworkHandle is not null) RunTestCases(tests, frameworkHandle);
+    }
 
+    public void Cancel() => _isCancelled = true;
+
+    private void RunTestCases(IEnumerable<TestCase> testCases, IFrameworkHandle frameworkHandle)
+    {
+        _isCancelled = false;
+        var resolver = new RegexSourceResolver();
         foreach (var testCase in testCases)
         {
             if (_isCancelled) break;
-
-            frameworkHandle?.RecordStart(testCase);
-            try
-            {
-                ExecuteTest(testCase, frameworkHandle);
-            }
-            catch (Exception ex)
-            {
-                frameworkHandle?.RecordResult(new TestResult(testCase)
-                {
-                    Outcome = TestOutcome.Failed,
-                    ErrorMessage = ex.Message,
-                    ErrorStackTrace = ex.StackTrace
-                });
-            }
-            frameworkHandle?.RecordEnd(testCase, TestOutcome.Passed);
+            frameworkHandle.RecordStart(testCase);
+            var result = ExecuteTest(testCase, resolver);
+            frameworkHandle.RecordResult(result);
+            frameworkHandle.RecordEnd(testCase, result.Outcome);
         }
     }
 
-    private class MessageLogger : IMessageLogger
+    private static TestResult ExecuteTest(TestCase testCase, RegexSourceResolver resolver)
     {
-        public void SendMessage(TestMessageLevel testMessageLevel, string message)
+        try
         {
-            Console.WriteLine($"{testMessageLevel}: {message}");
+            var descriptor = ReadDescriptor(testCase);
+            var regex = resolver.Resolve(descriptor);
+            var match = regex.Match(descriptor.TestData);
+            var passed = descriptor.TestKind switch
+            {
+                RegexTestKind.ShouldMatch => match.Success,
+                RegexTestKind.ShouldNotMatch => !match.Success,
+                RegexTestKind.Info => true,
+                _ => false
+            };
+            var status = descriptor.TestKind == RegexTestKind.Info ? (match.Success ? "MATCHED" : "NOT_MATCHED") : passed ? "PASSED" : "FAILED";
+            return CreateResult(testCase, passed ? TestOutcome.Passed : TestOutcome.Failed,
+                Describe(regex, descriptor.TestData, match, status));
+        }
+        catch (Exception exception)
+        {
+            return CreateResult(testCase, TestOutcome.Failed, exception.Message, exception);
         }
     }
 
-    private class TestCaseDiscoverySink : ITestCaseDiscoverySink
+    private static RegexTestDescriptor ReadDescriptor(TestCase testCase)
     {
-        public List<TestCase> TestCases { get; } = new List<TestCase>();
-
-        public void SendTestCase(TestCase testCase)
-        {
-            TestCases.Add(testCase);
-        }
+        var source = testCase.GetPropertyValue(TestPropertyItems.RegexSourceKind, string.Empty);
+        var kind = testCase.GetPropertyValue(TestPropertyItems.TestKind, string.Empty);
+        if (!Enum.TryParse(source, out RegexSourceKind sourceKind) || !Enum.TryParse(kind, out RegexTestKind testKind))
+            throw new InvalidOperationException($"Test case '{testCase.FullyQualifiedName}' does not contain a valid regex descriptor.");
+        return new RegexTestDescriptor(testCase.Source, testCase.GetPropertyValue(TestPropertyItems.DeclaringTypeName, string.Empty),
+            testCase.GetPropertyValue(TestPropertyItems.MemberName, string.Empty), sourceKind, testKind,
+            testCase.GetPropertyValue(TestPropertyItems.TestData, string.Empty), testCase.GetPropertyValue(TestPropertyItems.RegexOptionsValue, 0),
+            testCase.GetPropertyValue(TestPropertyItems.AttributeIndex, 0), testCase.CodeFilePath, testCase.LineNumber);
     }
 
+    private static TestResult CreateResult(TestCase testCase, TestOutcome outcome, string message, Exception? exception = null)
+    {
+        var result = new TestResult(testCase) { Outcome = outcome, DisplayName = testCase.DisplayName };
+        result.Messages.Add(new TestResultMessage(outcome == TestOutcome.Passed ? TestResultMessage.StandardOutCategory : TestResultMessage.StandardErrorCategory, message));
+        if (exception is not null) { result.ErrorMessage = exception.Message; result.ErrorStackTrace = exception.StackTrace; }
+        return result;
+    }
+
+    private static string Describe(Regex regex, string text, Match match, string status)
+    {
+        var details = new StringBuilder();
+        if (match.Success)
+            for (var i = 0; i < match.Groups.Count; i++)
+                details.AppendLine($"Group {regex.GroupNameFromNumber(i)}: '{match.Groups[i].Value}' (Position: {match.Groups[i].Index}, Length: {match.Groups[i].Length})");
+        return $"Status: {status}{Environment.NewLine}Pattern: '{regex}'{Environment.NewLine}Text: '{text}'" +
+               (details.Length == 0 ? string.Empty : $"{Environment.NewLine}{Environment.NewLine}Details:{Environment.NewLine}{details}".TrimEnd());
+    }
+
+    private sealed class FrameworkLogger : IMessageLogger
+    {
+        private readonly IFrameworkHandle _handle;
+        public FrameworkLogger(IFrameworkHandle handle) => _handle = handle;
+        public void SendMessage(TestMessageLevel level, string message) => _handle.SendMessage(level, message);
+    }
+
+    private sealed class TestCaseDiscoverySink : ITestCaseDiscoverySink
+    {
+        public List<TestCase> TestCases { get; } = new();
+        public void SendTestCase(TestCase testCase) => TestCases.Add(testCase);
+    }
 }

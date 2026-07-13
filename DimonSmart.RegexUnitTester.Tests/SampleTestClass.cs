@@ -2,6 +2,7 @@
 // ReSharper disable UnusedMember.Global
 
 using DimonSmart.RegexUnitTester.Attributes;
+using System.Text.RegularExpressions;
 
 #pragma warning disable CS0414 // Field is assigned but its value is never used
 namespace DimonSmart.RegexUnitTester.Tests;
@@ -23,9 +24,33 @@ public class SampleTestClass
     private static string PrivateStaticABC = @"abc";
 
     [InfoMatch("123-12-1234")]
-    private static string RegexWithError = @"(\d{3}-\d{2}-\d{4}";
+    private static string RegexWithError = @"(\d{3}-\d{2}-\d{4})";
 
+    [InfoMatch("123*12*1234")]
     [ShouldNotMatch("123_12-1234")]
     [ShouldMatch("123-12-1234")]
-    private static string SSN = @"(?<Area>\d{3})-(?<Group>\d{2})-(?<Serial>\d{4})(?<OptionalPart>-\d{2})?";
+    private static string SSN =
+        @"(?<Area>\d{3})-(?<Group>\d{2})-(?<Serial>\d{4})(?<OptionalPart>-\d{2})?";
+
+    [ShouldMatch("ABC", RegexOptions.IgnoreCase)]
+    private const string IgnoreCasePattern = "^abc$";
+
+    [ShouldMatch("")]
+    private const string EmptyStringRegex = "^$";
+
+    [ShouldMatch("abc")]
+    [ShouldNotMatch("xyz")]
+    private static string StringProperty => "^abc$";
+
+    [ShouldMatch("ABC")]
+    [ShouldNotMatch("xyz")]
+    private static readonly Regex CompiledRegex = new("^abc$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    [ShouldMatch("abc")]
+    [ShouldNotMatch("xyz")]
+    private static Regex RegexProperty => new("^abc$");
+
+    [ShouldMatch("abc")]
+    [ShouldNotMatch("xyz")]
+    private static Regex RegexMethod() => new("^abc$");
 }
